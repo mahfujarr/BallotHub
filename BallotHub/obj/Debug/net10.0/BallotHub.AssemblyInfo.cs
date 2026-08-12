@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BallotHub")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ab7d4bad6a81404e8901688fcd3c5ed938dbf071")]
 [assembly: System.Reflection.AssemblyProductAttribute("BallotHub")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BallotHub")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

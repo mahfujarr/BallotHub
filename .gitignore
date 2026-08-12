@@ -1,0 +1,67 @@
+## Build outputs
+[Oo]bj/
+[Bb]in/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+## Visual Studio / .NET
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.cache
+*.dbmdl
+*.pdb
+*.opendb
+*.VC.db
+*.VC.VC.opendb
+
+## NuGet
+*.nupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## ASP.NET / web
+*.log
+*.pid
+*.seed
+*.tmp
+*.temp
+appsettings.Development.json
+
+## Test results
+TestResults/
+coverage*/
+*.trx
+
+## OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+## JetBrains / Rider
+.idea/
+*.iml
+
+## ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+## Node / front-end tooling (if used later)
+node_modules/
+.npm/
+
+## Generated/temporary
+*.orig
+*.bak
+*.swp
+*.swo
+
+## Publish output
+publish/
