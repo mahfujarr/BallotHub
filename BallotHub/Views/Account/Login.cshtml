@@ -3,40 +3,54 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-5">
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                <div class="card shadow-sm mt-5">
+                    <div class="card-body text-center p-4">
+                        <h2 class="mb-3">You are already signed in</h2>
+                        <p class="text-muted mb-4">
+                            Continue to the home page to browse elections and results.
+                        </p>
 
-            <h2 class="mb-4">Login</h2>
-
-            <form asp-controller="Account" asp-action="Login" method="post">
-
-                <div asp-validation-summary="ModelOnly"
-                     class="text-danger mb-3"></div>
-
-                <div class="mb-3">
-                    <label asp-for="Email" class="form-label"></label>
-                    <input asp-for="Email" class="form-control" />
-                    <span asp-validation-for="Email"
-                          class="text-danger"></span>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                            Go to Home
+                        </a>
+                    </div>
                 </div>
+            }
+            else
+            {
+                <h2 class="mb-4">Login</h2>
 
-                <div class="mb-3">
-                    <label asp-for="Password" class="form-label"></label>
-                    <input asp-for="Password" class="form-control" />
-                    <span asp-validation-for="Password"
-                          class="text-danger"></span>
-                </div>
+                <form asp-controller="Account" asp-action="Login" method="post">
 
-                <div class="form-check mb-3">
-                    <input asp-for="RememberMe" class="form-check-input" />
-                    <label asp-for="RememberMe" class="form-check-label">
-                        Remember me
-                    </label>
-                </div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                <button type="submit" class="btn btn-primary">
-                    Login
-                </button>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
 
-            </form>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label asp-for="RememberMe" class="form-check-label">
+                            Remember me
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Login
+                    </button>
+
+                </form>
+            }
 
         </div>
     </div>

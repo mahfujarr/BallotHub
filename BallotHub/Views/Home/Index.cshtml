@@ -3,29 +3,48 @@
 }
 
 <div class="container">
+    @if (User.Identity?.IsAuthenticated ?? false)
+    {
+        <div class="text-center py-5">
+            <h1 class="display-4">Welcome back, @User.Identity?.Name</h1>
 
-    <!-- Welcome Section -->
-    <div class="text-center py-5">
-        <h1 class="display-4">Welcome to BallotHub</h1>
+            <p class="lead">
+                You are signed in and ready to review elections, cast your vote, and track results.
+            </p>
 
-        <p class="lead">
-            A simple online voting platform for managing and
-            participating in elections.
-        </p>
+            <div class="mt-4">
+                <a asp-controller="Election" asp-action="Index" class="btn btn-primary me-2">
+                    Browse Elections
+                </a>
 
-        <div class="mt-4">
-            <a asp-controller="Election" asp-action="Index" class="btn btn-primary me-2">
-                View Elections
-            </a>
-
-            <a asp-controller="Account" asp-action="Register" class="btn btn-outline-secondary">
-                Register
-            </a>
+                <a asp-controller="Results" asp-action="Index" class="btn btn-outline-secondary">
+                    View Results
+                </a>
+            </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <h1 class="display-4">Welcome to BallotHub</h1>
+
+            <p class="lead">
+                A simple online voting platform for managing and participating in elections.
+            </p>
+
+            <div class="mt-4">
+                <a asp-controller="Account" asp-action="Login" class="btn btn-primary me-2">
+                    Login
+                </a>
+
+                <a asp-controller="Account" asp-action="Register" class="btn btn-outline-secondary">
+                    Register
+                </a>
+            </div>
+        </div>
+    }
 
 
-    <!-- Features -->
     <div class="row text-center mb-5">
 
         <div class="col-md-4 mb-3">
@@ -70,7 +89,6 @@
     </div>
 
 
-    <!-- How It Works -->
     <div class="mb-5">
 
         <h2 class="text-center mb-4">How It Works</h2>
