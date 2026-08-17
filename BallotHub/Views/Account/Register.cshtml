@@ -1,0 +1,99 @@
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+
+            <div class="card mt-5 mb-5">
+                <div class="card-body p-4">
+
+                    <h2 class="text-center mb-4">
+                        Create an Account
+                    </h2>
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Registration Failed!</strong>
+                            <ul class="mb-0 mt-2">
+                                @foreach (var modelState in ViewData.ModelState.Values)
+                                {
+                                    @foreach (var error in modelState.Errors)
+                                    {
+                                        <li>@error.ErrorMessage</li>
+                                    }
+                                }
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Register" method="post">
+
+                        <div class="mb-3">
+                            <label for="FullName" class="form-label">
+                                Full Name
+                            </label>
+
+                            <input type="text" id="FullName" name="FullName" class="form-control"
+                                   placeholder="Enter your full name" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="NID" class="form-label">
+                                NID
+                            </label>
+
+                            <input type="text" id="NID" name="NID" class="form-control" placeholder="Enter your NID"
+                                   required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Email" class="form-label">
+                                Email
+                            </label>
+
+                            <input type="email" id="Email" name="Email" class="form-control"
+                                   placeholder="Enter your email" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Password" class="form-label">
+                                Password
+                            </label>
+
+                            <input type="password" id="Password" name="Password" class="form-control"
+                                   placeholder="Create a password" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="ConfirmPassword" class="form-label">
+                                Confirm Password
+                            </label>
+
+                            <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="form-control"
+                                   placeholder="Confirm your password" required />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            Register
+                        </button>
+
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <span>Already have an account?</span>
+
+                        <a asp-action="Login">
+                            Login
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

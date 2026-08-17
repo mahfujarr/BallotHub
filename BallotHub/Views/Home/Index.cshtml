@@ -1,8 +1,108 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container">
+
+    <!-- Welcome Section -->
+    <div class="text-center py-5">
+        <h1 class="display-4">Welcome to BallotHub</h1>
+
+        <p class="lead">
+            A simple online voting platform for managing and
+            participating in elections.
+        </p>
+
+        <div class="mt-4">
+            <a asp-controller="Election" asp-action="Index" class="btn btn-primary me-2">
+                View Elections
+            </a>
+
+            <a asp-controller="Account" asp-action="Register" class="btn btn-outline-secondary">
+                Register
+            </a>
+        </div>
+    </div>
+
+
+    <!-- Features -->
+    <div class="row text-center mb-5">
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Secure Voting</h5>
+
+                    <p class="card-text">
+                        Cast your vote through a secure and
+                        authenticated voting system.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Easy to Use</h5>
+
+                    <p class="card-text">
+                        Find elections, select your candidate,
+                        and submit your vote easily.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Election Results</h5>
+
+                    <p class="card-text">
+                        View election results after the voting
+                        period has ended.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- How It Works -->
+    <div class="mb-5">
+
+        <h2 class="text-center mb-4">How It Works</h2>
+
+        <div class="row text-center">
+
+            <div class="col-md-4 mb-3">
+                <h4>1. Login</h4>
+                <p>
+                    Create an account or log in to your
+                    BallotHub account.
+                </p>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <h4>2. Vote</h4>
+                <p>
+                    Choose an available election and cast
+                    your vote.
+                </p>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <h4>3. View Results</h4>
+                <p>
+                    Check the results once the election
+                    has been completed.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
