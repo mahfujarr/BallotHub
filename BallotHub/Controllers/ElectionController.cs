@@ -33,7 +33,9 @@ public class ElectionController : Controller
     public async Task<IActionResult> Details(int id)
     {
         var election = await _db.Elections
+            .Include(item => item.Positions)
             .Include(item => item.Candidates)
+                .ThenInclude(candidate => candidate.Position)
             .SingleOrDefaultAsync(item => item.Id == id &&
                 (item.IsPublished || User.IsInRole("Administrator")));
 
@@ -145,9 +147,30 @@ public class ElectionController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
-        var election = await _db.Elections.FindAsync(id);
+        var election = await _db.Elections
+            .Include(item => item.Candidates)
+            .Include(item => item.Positions)
+            .SingleOrDefaultAsync(item => item.Id == id);
+
         if (election == null)
             return NotFound();
+
+        var candidateIds = election.Candidates.Select(candidate => candidate.Id).ToList();
+        if (candidateIds.Count > 0)
+        {
+            var relatedVotes = await _db.Votes
+                .Where(vote => candidateIds.Contains(vote.CandidateId) || vote.ElectionId == id)
+                .ToListAsync();
+
+            if (relatedVotes.Count > 0)
+                _db.Votes.RemoveRange(relatedVotes);
+        }
+
+        if (election.Positions.Any())
+            _db.Positions.RemoveRange(election.Positions);
+
+        if (election.Candidates.Any())
+            _db.Candidates.RemoveRange(election.Candidates);
 
         _db.Elections.Remove(election);
         await _db.SaveChangesAsync();
@@ -157,19 +180,162 @@ public class ElectionController : Controller
     [Authorize(Roles = "Administrator")]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddCandidate(int electionId, Candidate candidate)
+    public async Task<IActionResult> CreatePosition(int electionId, Position position)
     {
-        var electionExists = await _db.Elections.AnyAsync(election => election.Id == electionId);
-        if (!electionExists)
+        var election = await _db.Elections.FindAsync(electionId);
+        if (election == null)
             return NotFound();
 
-        if (!ModelState.IsValid)
+        if (string.IsNullOrWhiteSpace(position.Name))
+        {
+            TempData["ElectionError"] = "Position name is required.";
             return RedirectToAction(nameof(Details), new { id = electionId });
+        }
+
+        position.ElectionId = electionId;
+        _db.Positions.Add(position);
+        await _db.SaveChangesAsync();
+        TempData["ElectionMessage"] = "The position has been created.";
+        return RedirectToAction(nameof(Details), new { id = electionId });
+    }
+
+    [Authorize(Roles = "Administrator")]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddCandidate(int electionId, Candidate candidate)
+    {
+        var election = await _db.Elections
+            .Include(item => item.Positions)
+            .SingleOrDefaultAsync(item => item.Id == electionId);
+
+        if (election == null)
+            return NotFound();
+
+        if (!candidate.PositionId.HasValue || !election.Positions.Any(position => position.Id == candidate.PositionId.Value))
+        {
+            TempData["ElectionError"] = "Select a valid position for this candidate.";
+            return RedirectToAction(nameof(Details), new { id = electionId });
+        }
+
+        if (!ModelState.IsValid)
+        {
+            TempData["ElectionError"] = "Please provide a valid candidate name.";
+            return RedirectToAction(nameof(Details), new { id = electionId });
+        }
 
         candidate.ElectionId = electionId;
         _db.Candidates.Add(candidate);
         await _db.SaveChangesAsync();
+        TempData["ElectionMessage"] = "The candidate has been added.";
         return RedirectToAction(nameof(Details), new { id = electionId });
+    }
+
+    [Authorize(Roles = "Administrator")]
+    [HttpGet]
+    public async Task<IActionResult> EditCandidate(int id)
+    {
+        var candidate = await _db.Candidates
+            .Include(item => item.Position)
+            .SingleOrDefaultAsync(item => item.Id == id);
+
+        if (candidate == null)
+            return NotFound();
+
+        var election = await _db.Elections
+            .Include(item => item.Positions)
+            .SingleOrDefaultAsync(item => item.Id == candidate.ElectionId);
+
+        if (election == null)
+            return NotFound();
+
+        ViewBag.ElectionId = election.Id;
+        ViewBag.Positions = election.Positions.OrderBy(position => position.Name).ToList();
+        return View(candidate);
+    }
+
+    [Authorize(Roles = "Administrator")]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditCandidate(int id, Candidate candidate)
+    {
+        var existingCandidate = await _db.Candidates
+            .SingleOrDefaultAsync(item => item.Id == id);
+
+        if (existingCandidate == null)
+            return NotFound();
+
+        var election = await _db.Elections
+            .Include(item => item.Positions)
+            .SingleOrDefaultAsync(item => item.Id == existingCandidate.ElectionId);
+
+        if (election == null)
+            return NotFound();
+
+        if (!candidate.PositionId.HasValue || !election.Positions.Any(position => position.Id == candidate.PositionId.Value))
+        {
+            TempData["ElectionError"] = "Select a valid position for this candidate.";
+            return RedirectToAction(nameof(Details), new { id = existingCandidate.ElectionId });
+        }
+
+        if (!ModelState.IsValid)
+        {
+            TempData["ElectionError"] = "Please provide a valid candidate name.";
+            return RedirectToAction(nameof(Details), new { id = existingCandidate.ElectionId });
+        }
+
+        existingCandidate.Name = candidate.Name;
+        existingCandidate.Biography = candidate.Biography;
+        existingCandidate.PositionId = candidate.PositionId;
+
+        await _db.SaveChangesAsync();
+        TempData["ElectionMessage"] = "The candidate has been updated.";
+        return RedirectToAction(nameof(Details), new { id = existingCandidate.ElectionId });
+    }
+
+    [Authorize(Roles = "Administrator")]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteCandidate(int id)
+    {
+        var candidate = await _db.Candidates.FindAsync(id);
+        if (candidate == null)
+            return NotFound();
+
+        var electionId = candidate.ElectionId;
+        _db.Candidates.Remove(candidate);
+        await _db.SaveChangesAsync();
+        TempData["ElectionMessage"] = "The candidate has been deleted.";
+        return RedirectToAction(nameof(Details), new { id = electionId });
+    }
+
+    [Authorize(Roles = "Administrator")]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AssignCandidateToPosition(int candidateId, int positionId)
+    {
+        var candidate = await _db.Candidates
+            .SingleOrDefaultAsync(item => item.Id == candidateId);
+
+        if (candidate == null)
+            return NotFound();
+
+        var election = await _db.Elections
+            .Include(item => item.Positions)
+            .SingleOrDefaultAsync(item => item.Id == candidate.ElectionId);
+
+        if (election == null)
+            return NotFound();
+
+        if (!election.Positions.Any(position => position.Id == positionId))
+        {
+            TempData["ElectionError"] = "That position does not belong to this election.";
+            return RedirectToAction(nameof(Details), new { id = candidate.ElectionId });
+        }
+
+        candidate.PositionId = positionId;
+        await _db.SaveChangesAsync();
+        TempData["ElectionMessage"] = "The candidate has been assigned to the selected position.";
+        return RedirectToAction(nameof(Details), new { id = candidate.ElectionId });
     }
 
     [HttpPost]
