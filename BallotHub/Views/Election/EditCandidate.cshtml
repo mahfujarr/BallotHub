@@ -1,0 +1,42 @@
+@model BallotHub.Models.Candidate
+@{
+    ViewData["Title"] = "Edit Candidate";
+    var positions = ViewBag.Positions as IEnumerable<BallotHub.Models.Position> ?? Enumerable.Empty<BallotHub.Models.Position>();
+}
+
+<div class="row justify-content-center my-4">
+    <div class="col-lg-8">
+        <h1>Edit candidate</h1>
+        <form asp-action="EditCandidate" asp-route-id="@Model.Id" method="post" class="card card-body shadow-sm mt-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Biography" class="form-label"></label>
+                <textarea asp-for="Biography" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Biography" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="PositionId" class="form-label">Position</label>
+                <select asp-for="PositionId" class="form-select">
+                    <option value="">-- Select position --</option>
+                    @foreach (var position in positions)
+                    {
+                        <option value="@position.Id" selected="@(Model.PositionId == position.Id)">@position.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="PositionId" class="text-danger"></span>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Save changes</button>
+                <a asp-action="Details" asp-route-id="@ViewBag.ElectionId" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BallotHub.Models;
 
-public class Candidate
+public class Position
 {
     public int Id { get; set; }
 
@@ -10,13 +10,9 @@ public class Candidate
     public string Name { get; set; } = string.Empty;
 
     [StringLength(1000)]
-    public string Biography { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
 
     public int ElectionId { get; set; }
     public Election Election { get; set; } = null!;
-
-    public int? PositionId { get; set; }
-    public Position? Position { get; set; }
-
-    public ICollection<Vote> Votes { get; set; } = new List<Vote>();
+    public ICollection<Candidate> Candidates { get; set; } = new List<Candidate>();
 }

@@ -14,6 +14,7 @@ namespace BallotHub.Data
 
         public DbSet<Election> Elections => Set<Election>();
         public DbSet<Candidate> Candidates => Set<Candidate>();
+        public DbSet<Position> Positions => Set<Position>();
         public DbSet<Vote> Votes => Set<Vote>();
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -24,11 +25,23 @@ namespace BallotHub.Data
                 .HasIndex(vote => new { vote.ElectionId, vote.UserId })
                 .IsUnique();
 
+            builder.Entity<Position>()
+                .HasOne(position => position.Election)
+                .WithMany(election => election.Positions)
+                .HasForeignKey(position => position.ElectionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.Entity<Candidate>()
                 .HasOne(candidate => candidate.Election)
                 .WithMany(election => election.Candidates)
                 .HasForeignKey(candidate => candidate.ElectionId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Candidate>()
+                .HasOne(candidate => candidate.Position)
+                .WithMany(position => position.Candidates)
+                .HasForeignKey(candidate => candidate.PositionId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<Vote>()
                 .HasOne(vote => vote.Election)

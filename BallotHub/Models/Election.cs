@@ -37,6 +37,7 @@ public class Election
     }
 
     public ICollection<Candidate> Candidates { get; set; } = new List<Candidate>();
+    public ICollection<Position> Positions { get; set; } = new List<Position>();
     public ICollection<Vote> Votes { get; set; } = new List<Vote>();
 }
 

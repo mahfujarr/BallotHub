@@ -54,26 +54,62 @@
 <div class="row g-4">
     <div class="col-lg-8">
         <h2 class="h4">Candidates</h2>
+        @if (isOpen)
+        {
+            <form id="candidate-ballot" asp-action="Vote" method="post" class="d-flex justify-content-between align-items-center gap-3 mb-3 p-3 border rounded bg-light">
+                <input type="hidden" name="electionId" value="@Model.Id" />
+                <span class="text-muted">Choose one candidate to cast your vote.</span>
+                <button type="submit" class="btn btn-primary flex-shrink-0">Submit vote</button>
+            </form>
+        }
         @if (Model.Candidates.Any())
         {
             <div class="list-group">
-                @foreach (var candidate in Model.Candidates)
+                @foreach (var candidate in Model.Candidates.OrderBy(item => item.Position?.Name ?? string.Empty).ThenBy(item => item.Name))
                 {
                     <div class="list-group-item">
                         <div class="d-flex justify-content-between align-items-start gap-3">
-                            <div>
+                            <div class="d-flex align-items-start gap-3">
+                                @if (isOpen)
+                                {
+                                    <input class="form-check-input mt-1" type="radio" name="candidateId" value="@candidate.Id" form="candidate-ballot" required aria-label="Select @candidate.Name" />
+                                }
+                                <div>
                                 <h3 class="h5 mb-1">@candidate.Name</h3>
+                                <p class="mb-1"><strong>Position:</strong> @(candidate.Position?.Name ?? "Unassigned")</p>
                                 <p class="mb-0 text-muted">@candidate.Biography</p>
+                                </div>
                             </div>
-                            @if (isOpen)
+                            @if (User.IsInRole("Administrator"))
                             {
-                                <form asp-action="Vote" method="post">
-                                    <input type="hidden" name="electionId" value="@Model.Id" />
-                                    <input type="hidden" name="candidateId" value="@candidate.Id" />
-                                    <button type="submit" class="btn btn-primary">Vote</button>
-                                </form>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <a asp-action="EditCandidate" asp-route-id="@candidate.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                    <form asp-action="DeleteCandidate" asp-route-id="@candidate.Id" method="post">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this candidate?');">Delete</button>
+                                    </form>
+                                </div>
                             }
                         </div>
+
+                        @if (User.IsInRole("Administrator"))
+                        {
+                            <form asp-action="AssignCandidateToPosition" method="post" class="row g-2 mt-3 align-items-end">
+                                <input type="hidden" name="candidateId" value="@candidate.Id" />
+                                <div class="col-md-8">
+                                    <label class="form-label small mb-1">Assign position</label>
+                                    <select name="positionId" class="form-select form-select-sm">
+                                        <option value="">-- Select position --</option>
+                                        @foreach (var position in Model.Positions.OrderBy(item => item.Name))
+                                        {
+                                            <option value="@position.Id" selected="@(candidate.PositionId == position.Id)">@position.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-sm btn-primary">Assign</button>
+                                </div>
+                            </form>
+                        }
                     </div>
                 }
             </div>
@@ -87,7 +123,7 @@
     @if (User.IsInRole("Administrator"))
     {
         <div class="col-lg-4">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm mb-3">
                 <div class="card-body">
                     <h2 class="h5">Add candidate</h2>
                     <form asp-action="AddCandidate" method="post">
@@ -100,7 +136,35 @@
                             <label class="form-label" for="biography">Biography</label>
                             <textarea class="form-control" id="biography" name="Biography" rows="4" maxlength="1000"></textarea>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="candidatePositionId">Position</label>
+                            <select class="form-select" id="candidatePositionId" name="PositionId" required>
+                                <option value="">-- Select position --</option>
+                                @foreach (var position in Model.Positions.OrderBy(item => item.Name))
+                                {
+                                    <option value="@position.Id">@position.Name</option>
+                                }
+                            </select>
+                        </div>
                         <button type="submit" class="btn btn-primary">Add candidate</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5">Create position</h2>
+                    <form asp-action="CreatePosition" method="post">
+                        <input type="hidden" name="electionId" value="@Model.Id" />
+                        <div class="mb-3">
+                            <label class="form-label" for="positionName">Position name</label>
+                            <input class="form-control" id="positionName" name="Name" required maxlength="200" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="positionDescription">Description</label>
+                            <textarea class="form-control" id="positionDescription" name="Description" rows="3" maxlength="1000"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary">Create position</button>
                     </form>
                 </div>
             </div>
