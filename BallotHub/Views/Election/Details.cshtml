@@ -1,0 +1,109 @@
+@model BallotHub.Models.Election
+@{
+    ViewData["Title"] = Model.Title;
+    var isOpen = Model.IsPublished && Model.Status == BallotHub.Models.ElectionStatus.Active;
+}
+
+<div class="d-flex justify-content-between align-items-start my-4">
+    <div>
+        <h1>@Model.Title</h1>
+        <p class="text-muted">@Model.Description</p>
+    </div>
+    @if (User.IsInRole("Administrator"))
+    {
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit</a>
+            @if (Model.Status == BallotHub.Models.ElectionStatus.Upcoming)
+            {
+                <form asp-action="Start" asp-route-id="@Model.Id" method="post">
+                    <button type="submit" class="btn btn-success">Start</button>
+                </form>
+            }
+            @if (Model.Status == BallotHub.Models.ElectionStatus.Active)
+            {
+                <form asp-action="End" asp-route-id="@Model.Id" method="post">
+                    <button type="submit" class="btn btn-warning">End</button>
+                </form>
+            }
+            <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Delete this election?');">Delete</button>
+            </form>
+        </div>
+    }
+</div>
+
+@if (TempData["ElectionError"] is string error)
+{
+    <div class="alert alert-danger">@error</div>
+}
+@if (TempData["ElectionMessage"] is string message)
+{
+    <div class="alert alert-success">@message</div>
+}
+
+<div class="mb-4">
+    <strong>Voting period:</strong> @Model.StartDate.ToString("g") - @Model.EndDate.ToString("g")
+    <span class="badge @(Model.Status switch
+                          {
+                              BallotHub.Models.ElectionStatus.Active => "text-bg-success",
+                              BallotHub.Models.ElectionStatus.Finished => "text-bg-dark",
+                              _ => "text-bg-warning"
+                          }) ms-2">@Model.Status</span>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <h2 class="h4">Candidates</h2>
+        @if (Model.Candidates.Any())
+        {
+            <div class="list-group">
+                @foreach (var candidate in Model.Candidates)
+                {
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                                <h3 class="h5 mb-1">@candidate.Name</h3>
+                                <p class="mb-0 text-muted">@candidate.Biography</p>
+                            </div>
+                            @if (isOpen)
+                            {
+                                <form asp-action="Vote" method="post">
+                                    <input type="hidden" name="electionId" value="@Model.Id" />
+                                    <input type="hidden" name="candidateId" value="@candidate.Id" />
+                                    <button type="submit" class="btn btn-primary">Vote</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning">No candidates have been added yet.</div>
+        }
+    </div>
+
+    @if (User.IsInRole("Administrator"))
+    {
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5">Add candidate</h2>
+                    <form asp-action="AddCandidate" method="post">
+                        <input type="hidden" name="electionId" value="@Model.Id" />
+                        <div class="mb-3">
+                            <label class="form-label" for="candidateName">Name</label>
+                            <input class="form-control" id="candidateName" name="Name" required maxlength="200" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="biography">Biography</label>
+                            <textarea class="form-control" id="biography" name="Biography" rows="4" maxlength="1000"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add candidate</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>
