@@ -1,0 +1,44 @@
+@model IEnumerable<BallotHub.Models.Election>
+@{
+    ViewData["Title"] = "Elections";
+}
+
+<div class="d-flex justify-content-between align-items-center my-4">
+    <div>
+        <h1>Elections</h1>
+        <p class="text-muted mb-0">Browse published elections and manage the voting calendar.</p>
+    </div>
+    @if (User.IsInRole("Administrator"))
+    {
+        <a asp-action="Create" class="btn btn-primary">Create election</a>
+    }
+</div>
+
+<div class="row g-4">
+    @foreach (var election in Model)
+    {
+        <div class="col-md-6 col-xl-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between gap-2">
+                        <h2 class="h5">@election.Title</h2>
+                        <span class="badge @(election.Status switch
+                                             {
+                                                 BallotHub.Models.ElectionStatus.Active => "text-bg-success",
+                                                 BallotHub.Models.ElectionStatus.Finished => "text-bg-dark",
+                                                 _ => "text-bg-warning"
+                                             })">@election.Status</span>
+                    </div>
+                    <p class="text-muted">@election.Description</p>
+                    <p class="small mb-3">@election.StartDate.ToString("g") - @election.EndDate.ToString("g")</p>
+                    <a asp-action="Details" asp-route-id="@election.Id" class="btn btn-outline-primary mt-auto">View election</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info mt-4">There are no elections to display.</div>
+}

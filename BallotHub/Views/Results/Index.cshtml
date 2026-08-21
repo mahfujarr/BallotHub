@@ -1,0 +1,25 @@
+@model IEnumerable<BallotHub.Models.Election>
+@{
+    ViewData["Title"] = "Results";
+}
+
+<h1 class="my-4">Election results</h1>
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Results will appear here after a published election ends.</div>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var election in Model)
+        {
+            <a asp-action="Details" asp-route-id="@election.Id" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <span>
+                    <strong>@election.Title</strong>
+                    <small class="d-block text-muted">Ended @election.EndDate.ToString("g")</small>
+                </span>
+                <span aria-hidden="true">&rarr;</span>
+            </a>
+        }
+    </div>
+}
