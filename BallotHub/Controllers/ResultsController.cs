@@ -25,27 +25,38 @@ public class ResultsController : Controller
     public async Task<IActionResult> Details(int id)
     {
         var election = await _db.Elections
-            .Include(item => item.Candidates)
+            .Include(item => item.Positions)
+                .ThenInclude(position => position.Candidates)
             .SingleOrDefaultAsync(item => item.Id == id && item.IsPublished);
         if (election == null)
             return NotFound();
 
         var counts = await _db.Votes
             .Where(vote => vote.ElectionId == id)
-            .GroupBy(vote => vote.CandidateId)
-            .Select(group => new { CandidateId = group.Key, VoteCount = group.Count() })
-            .ToDictionaryAsync(item => item.CandidateId, item => item.VoteCount);
+            .GroupBy(vote => new { vote.PositionId, vote.CandidateId })
+            .Select(group => new { group.Key.PositionId, group.Key.CandidateId, VoteCount = group.Count() })
+            .ToListAsync();
 
         var model = new ElectionResultsViewModel
         {
             Election = election,
-            Candidates = election.Candidates
-                .Select(candidate => new CandidateResult
+            Positions = election.Positions
+                .Select(position => new PositionResult
                 {
-                    Candidate = candidate,
-                    VoteCount = counts.GetValueOrDefault(candidate.Id)
+                    Position = position,
+                    Candidates = position.Candidates
+                        .Where(candidate => candidate.ElectionId == id && candidate.PositionId == position.Id)
+                        .Select(candidate => new CandidateResult
+                        {
+                            Candidate = candidate,
+                            VoteCount = counts
+                                .Where(item => item.PositionId == position.Id && item.CandidateId == candidate.Id)
+                                .Select(item => item.VoteCount)
+                                .FirstOrDefault()
+                        })
+                        .OrderByDescending(item => item.VoteCount)
+                        .ToList()
                 })
-                .OrderByDescending(item => item.VoteCount)
                 .ToList()
         };
         return View(model);

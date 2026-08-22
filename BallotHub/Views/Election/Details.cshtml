@@ -56,11 +56,10 @@
         <h2 class="h4">Candidates</h2>
         @if (isOpen)
         {
-            <form id="candidate-ballot" asp-action="Vote" method="post" class="d-flex justify-content-between align-items-center gap-3 mb-3 p-3 border rounded bg-light">
-                <input type="hidden" name="electionId" value="@Model.Id" />
-                <span class="text-muted">Choose one candidate to cast your vote.</span>
-                <button type="submit" class="btn btn-primary flex-shrink-0">Submit vote</button>
-            </form>
+            <div class="mb-3 p-3 border rounded bg-light">
+                <span class="text-muted">View the complete ballot and select one candidate for every position.</span>
+                <a asp-controller="Voting" asp-action="Ballot" asp-route-electionId="@Model.Id" class="btn btn-primary float-end">View ballot</a>
+            </div>
         }
         @if (Model.Candidates.Any())
         {
@@ -70,10 +69,6 @@
                     <div class="list-group-item">
                         <div class="d-flex justify-content-between align-items-start gap-3">
                             <div class="d-flex align-items-start gap-3">
-                                @if (isOpen)
-                                {
-                                    <input class="form-check-input mt-1" type="radio" name="candidateId" value="@candidate.Id" form="candidate-ballot" required aria-label="Select @candidate.Name" />
-                                }
                                 <div>
                                 <h3 class="h5 mb-1">@candidate.Name</h3>
                                 <p class="mb-1"><strong>Position:</strong> @(candidate.Position?.Name ?? "Unassigned")</p>
