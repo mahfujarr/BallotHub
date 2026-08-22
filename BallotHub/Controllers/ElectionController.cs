@@ -1,7 +1,6 @@
 using BallotHub.Data;
 using BallotHub.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,12 +10,10 @@ namespace BallotHub.Controllers;
 public class ElectionController : Controller
 {
     private readonly ApplicationDbContext _db;
-    private readonly UserManager<ApplicationUser> _userManager;
 
-    public ElectionController(ApplicationDbContext db, UserManager<ApplicationUser> userManager)
+    public ElectionController(ApplicationDbContext db)
     {
         _db = db;
-        _userManager = userManager;
     }
 
     public async Task<IActionResult> Index()
@@ -336,43 +333,6 @@ public class ElectionController : Controller
         await _db.SaveChangesAsync();
         TempData["ElectionMessage"] = "The candidate has been assigned to the selected position.";
         return RedirectToAction(nameof(Details), new { id = candidate.ElectionId });
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Vote(int electionId, int candidateId)
-    {
-        var userId = _userManager.GetUserId(User);
-        if (userId == null)
-            return Challenge();
-
-        var election = await _db.Elections.FindAsync(electionId);
-        var candidateExists = await _db.Candidates.AnyAsync(candidate =>
-            candidate.Id == candidateId && candidate.ElectionId == electionId);
-
-        if (election == null || !election.IsPublished ||
-            DateTime.UtcNow < election.StartDate.ToUniversalTime() ||
-            DateTime.UtcNow > election.EndDate.ToUniversalTime() || !candidateExists)
-        {
-            TempData["ElectionError"] = "This election is not open for voting.";
-            return RedirectToAction(nameof(Details), new { id = electionId });
-        }
-
-        if (await _db.Votes.AnyAsync(vote => vote.ElectionId == electionId && vote.UserId == userId))
-        {
-            TempData["ElectionError"] = "You have already voted in this election.";
-            return RedirectToAction(nameof(Details), new { id = electionId });
-        }
-
-        _db.Votes.Add(new Vote
-        {
-            ElectionId = electionId,
-            CandidateId = candidateId,
-            UserId = userId
-        });
-        await _db.SaveChangesAsync();
-        TempData["ElectionMessage"] = "Your vote was recorded.";
-        return RedirectToAction(nameof(Details), new { id = electionId });
     }
 
     private void ValidateDates(Election election)

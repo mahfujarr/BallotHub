@@ -38,6 +38,17 @@ using (var scope = app.Services.CreateScope())
     {
         await roleManager.CreateAsync(new IdentityRole("Administrator"));
     }
+
+    if (app.Environment.IsDevelopment())
+    {
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var user = await userManager.FindByEmailAsync("iftekharsakib07@gmail.com");
+
+        if (user != null && !await userManager.IsInRoleAsync(user, "Administrator"))
+        {
+            await userManager.AddToRoleAsync(user, "Administrator");
+        }
+    }
 }
 
 // Configure the HTTP request pipeline.

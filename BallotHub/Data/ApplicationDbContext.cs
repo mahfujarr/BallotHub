@@ -22,7 +22,7 @@ namespace BallotHub.Data
             base.OnModelCreating(builder);
 
             builder.Entity<Vote>()
-                .HasIndex(vote => new { vote.ElectionId, vote.UserId })
+                .HasIndex(vote => new { vote.ElectionId, vote.PositionId, vote.UserId })
                 .IsUnique();
 
             builder.Entity<Position>()
@@ -53,6 +53,12 @@ namespace BallotHub.Data
                 .HasOne(vote => vote.Candidate)
                 .WithMany(candidate => candidate.Votes)
                 .HasForeignKey(vote => vote.CandidateId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Vote>()
+                .HasOne(vote => vote.Position)
+                .WithMany()
+                .HasForeignKey(vote => vote.PositionId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<Vote>()
