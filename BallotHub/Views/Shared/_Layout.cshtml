@@ -55,6 +55,15 @@
                             </a>
                         </li>
 
+                        @if (User.IsInRole("Administrator"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Admin" asp-action="Dashboard">
+                                    Admin Dashboard
+                                </a>
+                            </li>
+                        }
+
                     </ul>
 
                     <!-- Right side -->
