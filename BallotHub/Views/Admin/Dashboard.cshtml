@@ -1,0 +1,111 @@
+@model BallotHub.Models.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h1 class="my-4">Admin dashboard</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4 col-lg-2">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Elections</p>
+                <p class="h3 mb-0">@Model.TotalElections</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Published</p>
+                <p class="h3 mb-0">@Model.PublishedElections</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Active</p>
+                <p class="h3 mb-0">@Model.ActiveElections</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Candidates</p>
+                <p class="h3 mb-0">@Model.TotalCandidates</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Votes</p>
+                <p class="h3 mb-0">@Model.TotalVotes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="card h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Voters</p>
+                <p class="h3 mb-0">@Model.TotalVoters</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!Model.Elections.Any())
+{
+    <div class="alert alert-info">No elections have been created yet.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Election</th>
+                    <th>Status</th>
+                    <th>Published</th>
+                    <th>Positions</th>
+                    <th>Candidates</th>
+                    <th>Votes</th>
+                    <th>Voters</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var election in Model.Elections)
+            {
+                <tr>
+                    <td>
+                        <strong>@election.Title</strong>
+                        <div class="text-muted small">
+                            @election.StartDate.ToString("g") - @election.EndDate.ToString("g")
+                        </div>
+                    </td>
+                    <td>@election.Status</td>
+                    <td>@(election.IsPublished ? "Yes" : "No")</td>
+                    <td>@election.PositionCount</td>
+                    <td>@election.CandidateCount</td>
+                    <td>@election.VoteCount</td>
+                    <td>@election.DistinctVoterCount</td>
+                    <td>
+                        <a asp-controller="Election" asp-action="Details" asp-route-id="@election.ElectionId" class="btn btn-sm btn-outline-primary">
+                            Manage
+                        </a>
+                        @if (election.Status == BallotHub.Models.ElectionStatus.Finished)
+                        {
+                            <a asp-controller="Results" asp-action="Details" asp-route-id="@election.ElectionId" class="btn btn-sm btn-outline-success ms-1">
+                                Results
+                            </a>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
