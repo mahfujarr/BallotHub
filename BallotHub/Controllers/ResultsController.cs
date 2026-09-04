@@ -15,8 +15,9 @@ public class ResultsController : Controller
 
     public async Task<IActionResult> Index()
     {
+        var now = DateTime.Now;
         var elections = await _db.Elections
-            .Where(election => election.EndDate < DateTime.UtcNow &&
+            .Where(election => election.EndDate < now &&
                 (election.IsPublished || User.IsInRole("Administrator")))
             .OrderByDescending(election => election.EndDate)
             .ToListAsync();
@@ -33,7 +34,7 @@ public class ResultsController : Controller
         if (election == null)
             return NotFound();
 
-        if (election.EndDate >= DateTime.UtcNow)
+        if (election.EndDate >= DateTime.Now)
             return NotFound();
 
         var counts = await _db.Votes
