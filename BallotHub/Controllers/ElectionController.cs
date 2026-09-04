@@ -214,12 +214,14 @@ public class ElectionController : Controller
             return RedirectToAction(nameof(Details), new { id = electionId });
         }
 
-        if (!ModelState.IsValid)
+        var candidateName = (candidate.Name ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(candidateName))
         {
             TempData["ElectionError"] = "Please provide a valid candidate name.";
             return RedirectToAction(nameof(Details), new { id = electionId });
         }
 
+        candidate.Name = candidateName;
         candidate.ElectionId = electionId;
         _db.Candidates.Add(candidate);
         await _db.SaveChangesAsync();
@@ -274,13 +276,14 @@ public class ElectionController : Controller
             return RedirectToAction(nameof(Details), new { id = existingCandidate.ElectionId });
         }
 
-        if (!ModelState.IsValid)
+        var candidateName = (candidate.Name ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(candidateName))
         {
             TempData["ElectionError"] = "Please provide a valid candidate name.";
             return RedirectToAction(nameof(Details), new { id = existingCandidate.ElectionId });
         }
 
-        existingCandidate.Name = candidate.Name;
+        existingCandidate.Name = candidateName;
         existingCandidate.Biography = candidate.Biography;
         existingCandidate.PositionId = candidate.PositionId;
 
